@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import './App.css'; // make sure this file has the styles below
 
-import './App.css';
-
-function ReminderApp() {
+const ReminderApp = () => {
+  const [tasks, setTasks] = useState([]);
   const [taskName, setTaskName] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [tasks, setTasks] = useState([]);
   const [filter, setFilter] = useState('all');
 
   const handleAddTask = (e) => {
     e.preventDefault();
+    if (!taskName || !dueDate) return;
 
     const newTask = {
       id: Date.now(),
@@ -18,16 +18,17 @@ function ReminderApp() {
       completed: false,
     };
 
-    setTasks([...tasks, newTask]);
+    setTasks((prev) => [...prev, newTask]);
     setTaskName('');
     setDueDate('');
   };
 
   const toggleCompletion = (id) => {
-    const updatedTasks = tasks.map((task) =>
-      task.id === id ? { ...task, completed: !task.completed } : task
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
     );
-    setTasks(updatedTasks);
   };
 
   const filteredTasks = tasks.filter((task) => {
@@ -37,46 +38,44 @@ function ReminderApp() {
   });
 
   return (
-    <div className="App">
-      <h1>Reminder App</h1>
+    <div className="container">
+  <h1>🧸 Reminder App 🧸</h1>
+  <form onSubmit={handleAddTask}>
+    <input
+      type="text"
+      value={taskName}
+      onChange={(e) => setTaskName(e.target.value)}
+      placeholder="Task Name"
+      required
+    />
+    <input
+      type="date"
+      value={dueDate}
+      onChange={(e) => setDueDate(e.target.value)}
+      required
+    />
+    <button type="submit">Add Task</button>
+  </form>
 
-      <form onSubmit={handleAddTask}>
-        <input
-          type="text"
-          value={taskName}
-          onChange={(e) => setTaskName(e.target.value)}
-          placeholder="Task Name"
-          required
-        />
-        <input
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          required
-        />
-        <button type="submit">Add Task</button>
-      </form>
+  <div className="filter-buttons">
+    <button onClick={() => setFilter('all')}>All</button>
+    <button onClick={() => setFilter('completed')}>Completed</button>
+    <button onClick={() => setFilter('incomplete')}>Incomplete</button>
+  </div>
 
-      <div>
-        <button onClick={() => setFilter('all')}>All</button>
-        <button onClick={() => setFilter('completed')}>Completed</button>
-        <button onClick={() => setFilter('incomplete')}>Incomplete</button>
-      </div>
+  <ul>
+    {filteredTasks.map((task) => (
+      <li key={task.id} className={task.completed ? 'completed' : ''}>
+        <span>{task.taskName} - {task.dueDate}</span>
+        <button onClick={() => toggleCompletion(task.id)}>
+          {task.completed ? 'Undo' : 'Done'}
+        </button>
+      </li>
+    ))}
+  </ul>
+</div>
 
-      <ul>
-        {filteredTasks.map((task) => (
-          <li key={task.id}>
-            <div>
-              <span>{task.taskName} - {task.dueDate}</span>
-              <button onClick={() => toggleCompletion(task.id)}>
-                {task.completed ? 'Mark Incomplete' : 'Mark Completed'}
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
-}
+};
 
 export default ReminderApp;
